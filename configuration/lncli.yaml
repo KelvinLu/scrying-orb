@@ -1,0 +1,14 @@
+# lncli.yaml
+
+# Modifies the behavior of lncli.
+#
+# Globally-configured options may be passed in as a single string, or as a list
+# of strings, to be included in all command line calls.
+#
+# e.g.;
+#
+# options: '--help'
+# options:
+#   - '--rpcserver'
+#   - 'somewhere.else:10009'
+---
