@@ -1,0 +1,2 @@
+class ScryingOrb::MatrixCorrelationReport
+end
