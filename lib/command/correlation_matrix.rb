@@ -17,6 +17,10 @@ class ScryingOrb::Command::CorrelationMatrix
     self.on('--show-nodes=N', 'Limit the number of nodes shown (default: 30)', Integer) do |number|
       options[:show_nodes] = number
     end
+
+    self.on('--no-gradient', 'Use 16-bit discrete terminal colors instead of a gradient') do
+      options[:color_8] = true
+    end
   end
 
   run do |options:, arguments:|
@@ -35,6 +39,7 @@ class ScryingOrb::Command::CorrelationMatrix
       end_time: end_time,
       channel_list: channel_list,
       show_nodes: options[:show_nodes] || 30,
+      color_256: !options[:color_8]
     )
 
     report.display

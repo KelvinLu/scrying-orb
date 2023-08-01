@@ -1,5 +1,5 @@
 class ScryingOrb::MatrixCorrelationReport
-  def initialize(start_time:, end_time:, channel_list:, show_nodes: 30)
+  def initialize(start_time:, end_time:, channel_list:, show_nodes: 30, color_256: true)
     @start_time = start_time
     @end_time   = end_time
 
@@ -8,6 +8,7 @@ class ScryingOrb::MatrixCorrelationReport
     @fwdinghistory = ScryingOrb::ForwardingHistory.new(start_time: start_time, end_time: end_time, channel_list: channel_list).history
 
     @show_nodes = show_nodes
+    @color_256 = color_256
 
     calculate
   end
@@ -69,8 +70,13 @@ class ScryingOrb::MatrixCorrelationReport
 
     calculation(:top_nodes_in).each do |node_in|
       calculation(:top_nodes_out).each do |node_out|
-        color = color_grade(volume[node_in][node_out])
-        print '. '.send(color).gray
+        if @color_256
+          ratio = (volume[node_in][node_out].to_f / @calculations[:max_value])
+          print '. '.bg_color_256(Color::Gradient::TURQUOISE.(ratio)).color_256(0x486950)
+        else
+          color = color_grade(volume[node_in][node_out])
+          print '. '.send(color).gray
+        end
       end
 
       puts " <- #{node_in&.alias || node_in&.pubkey || '(other)'}"
@@ -90,22 +96,31 @@ class ScryingOrb::MatrixCorrelationReport
   def puts_color_scale
     n = @calculations[:max_value]
 
-    print ' 0.0% -  12.5%'.bg_black
-    puts " ~ #{(n * 0.125).to_i} satoshi".rjust(30)
-    print '12.5% -  25.0%'.bg_red
-    puts " ~ #{(n * 0.25).to_i} satoshi".rjust(30)
-    print '25.0% -  3.75%'.bg_brown
-    puts " ~ #{(n * 0.375).to_i} satoshi".rjust(30)
-    print '37.5% -  50.0%'.bg_green
-    puts " ~ #{(n * 0.5).to_i} satoshi".rjust(30)
-    print '50.0% -  62.5%'.bg_cyan
-    puts " ~ #{(n * 0.625).to_i} satoshi".rjust(30)
-    print '62.5% -  75.0%'.bg_blue
-    puts " ~ #{(n * 0.75).to_i} satoshi".rjust(30)
-    print '75.0% -  87.5%'.bg_magenta
-    puts " ~ #{(n * 0.875).to_i} satoshi".rjust(30)
-    print '87.5% - 100.0%'.bg_gray
-    puts " ~ #{n.to_i} satoshi".rjust(30)
+    if @color_256
+      print '['
+      40.times do |i|
+        print '|'.color_256(Color::Gradient::TURQUOISE.(0.025 * i))
+      end
+      puts ']'
+      puts " 0 - #{n.to_i.to_s.rjust(28)} satoshi"
+    else
+      print ' 0.0% -  12.5%'.bg_black
+      puts " ~ #{(n * 0.125).to_i} satoshi".rjust(30)
+      print '12.5% -  25.0%'.bg_red
+      puts " ~ #{(n * 0.25).to_i} satoshi".rjust(30)
+      print '25.0% -  3.75%'.bg_brown
+      puts " ~ #{(n * 0.375).to_i} satoshi".rjust(30)
+      print '37.5% -  50.0%'.bg_green
+      puts " ~ #{(n * 0.5).to_i} satoshi".rjust(30)
+      print '50.0% -  62.5%'.bg_cyan
+      puts " ~ #{(n * 0.625).to_i} satoshi".rjust(30)
+      print '62.5% -  75.0%'.bg_blue
+      puts " ~ #{(n * 0.75).to_i} satoshi".rjust(30)
+      print '75.0% -  87.5%'.bg_magenta
+      puts " ~ #{(n * 0.875).to_i} satoshi".rjust(30)
+      print '87.5% - 100.0%'.bg_gray
+      puts " ~ #{n.to_i} satoshi".rjust(30)
+    end
   end
 
   def color_grade(amount)
